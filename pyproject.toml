@@ -1,0 +1,20 @@
+[project]
+name = "embedding_example"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.13"
+dependencies = [
+    "openai",
+    "google-generativeai",
+    "numpy",
+    "scikit-learn",
+    "matplotlib",
+    "python-dotenv",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff",
+    "black",
+    "pytest",
+]
