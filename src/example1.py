@@ -56,6 +56,26 @@ evaluation_data = {
         ["新しいスマートフォンの発表が期待されている。", "The announcement of a new smartphone is highly anticipated."],
         ["これはペンです。", "This is a pen."],
         ["私はこの映画が大好きです。", "I love this movie."]
+    ],
+    "synonym": [
+        ["彼はすぐに走り出した。", "彼は直ちに駆け出した。"],
+        ["問題の解決策を見つける。", "課題のソリューションを発見する。"],
+        ["このプロジェクトは重要だ。", "この案件は肝要である。"]
+    ],
+    "negation": [
+        ["このシステムは安全です。", "このシステムは安全ではありません。"],
+        ["私はその意見に賛成だ。", "私はその意見に賛成ではない。"],
+        ["彼は会議に出席する。", "彼は会議に出席しない。"]
+    ],
+    "hypernymy": [
+        ["これは動物です。", "これは犬です。"],
+        ["乗り物に乗って移動する。", "自動車に乗って移動する。"],
+        ["美味しい果物を食べる。", "美味しいリンゴを食べる。"]
+    ],
+    "contradiction": [
+        ["日本の首都は東京です。", "日本の首都は大阪です。"],
+        ["地球は太陽の周りを公転している。", "太陽は地球の周りを公転している。"],
+        ["水は100度で沸騰する。", "水は0度で沸騰する。"]
     ]
 }
 
@@ -74,7 +94,6 @@ for model_key, model_name in models_to_test.items():
     for scenario, pairs in evaluation_data.items():
         scores = []
         for pair in pairs:
-            # 2つのテキストを一度にエンベディング（API効率化）
             embeddings = get_embedding(pair, model_name)
             emb1 = embeddings[0]
             emb2 = embeddings[1]
@@ -95,9 +114,15 @@ for model_key, model_name in models_to_test.items():
         })
     print("-" * 20)
 
-# --- 改善点3: 結果をDataFrameで見やすく表示 ---
 df_results = pd.DataFrame(results_list)
 print("\n--- 総合結果 ---")
-# モデルごと、シナリオごとに結果をピボットして見やすくする
 pivot_table = df_results.pivot(index="model", columns="scenario", values="avg_score")
+column_order = [
+    "similar", "synonym", "multilingual", # 高い方が良い
+    "hypernymy",                          # 中程度が期待される
+    "negation", "contradiction", "unrelated"  # 低い方が良い
+]
+existing_columns = [col for col in column_order if col in pivot_table.columns]
+pivot_table = pivot_table[existing_columns]
+pd.set_option('display.float_format', '{:.4f}'.format)
 print(pivot_table)
